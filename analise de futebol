@@ -1,1 +1,720 @@
+index.html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Projeções V26</title>
+    <!-- Carrega Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- TEMA DARK EXTREMO --- */
+        :root {
+            --primary-color: #10b981; /* Esmeralda 500 (Botão Calcular) */
+            --secondary-color: #ef4444; /* Vermelho 500 (Botão Limpar) */
+            --ai-color: #3b82f6; /* Azul 500 (Botão IA) */
+            --background-color: #0d1117; /* GitHub Dark (Fundo principal) */
+            --card-background: #161b22; /* GitHub Darker (Fundo dos cards) */
+            --input-background: #21262d; /* GitHub Input */
+            --border-color: #30363d; /* GitHub Border */
+            --grid-border-color: #4f5b66; /* Borda da grelha mais visível */
+            --text-color: #f0f6fc; /* Texto Claro */
+            --header-background: #30363d; /* Fundo dos Títulos */
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+        }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .card {
+            background-color: var(--card-background);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Sombra mais profunda */
+        }
+
+        input[type="text"], input[type="number"] {
+            background-color: var(--input-background); 
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+        }
+
+        .header-title {
+            background-color: var(--header-background);
+            color: var(--text-color);
+        }
+
+        .input-label {
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 500;
+            color: #8b949e; /* Cinza suave */
+            margin-bottom: 2px;
+        }
+
+        /* Estilo para a Tabela de Gols por Minutos */
+        .minutos-table-container {
+            background-color: var(--input-background); 
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Implementação das Bordas da Grelha */
+        .minutos-table-container table {
+            border-collapse: collapse; /* Essencial para que as bordas de célula se juntem */
+        }
+        
+        .minutos-table-container th, .minutos-table-container td {
+            /* Aplica a borda a todas as células da tabela (cabeçalho e corpo) */
+            border: 1px solid var(--grid-border-color); 
+        }
+
+        .table-cell-header {
+            background-color: var(--header-background); 
+            color: var(--text-color);
+            font-size: 0.75rem;
+            padding: 4px 2px;
+            text-align: center;
+        }
+        .table-cell-input {
+            padding: 2px;
+        }
+        .table-cell-input input {
+            /* Input dentro da tabela de minutos */
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            padding: 2px;
+            font-size: 0.75rem;
+            background-color: #21262d; /* Fundo do input */
+            color: #f0f6fc; /* Letra clara */
+            border: none;
+            border-radius: 0; /* Remove o border-radius para se encaixar na célula */
+        }
+        .table-cell-input input:focus {
+            background-color: #2c313a; /* Levemente mais claro no foco */
+        }
+
+        /* Oculta as setas de número em campos number para melhor visualização mobile */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Estilos da Saída */
+        .output-section {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .output-header {
+            font-size: 1rem;
+            font-weight: 700;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid var(--header-background);
+        }
+        .prob-card {
+            background-color: #1f2937; /* Cinza escuro */
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.875rem; /* text-sm */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prob-value {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        /* Estilos de Prognóstico (IA) */
+        .prognostico-card {
+            background-color: #1f2937;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ai-color);
+        }
+        .prognostico-header {
+            font-weight: 700;
+            color: var(--ai-color);
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+        }
+        .coerencia-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        .badge-coerente { background-color: #065f46; color: #a7f3d0; } /* Verde escuro */
+        .badge-incoerente { background-color: #991b1b; color: #fecaca; } /* Vermelho escuro */
+
+    </style>
+</head>
+<body>
+
+<div class="max-w-md mx-auto p-4 space-y-6">
+
+    <!-- Título do Dashboard -->
+    <header class="text-center">
+        <h1 class="text-2xl font-bold">Dashboard de Projeções V26</h1>
+        <p class="text-sm text-gray-400">Com Validação e Prognóstico IA Avançado (Gemini)</p>
+    </header>
+
+    <!-- 1. ENTRADA DE DADOS -->
+    <div class="card p-4 rounded-lg space-y-4">
+        <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">1. ENTRADA DE DADOS</h2>
+
+        <button id="limpar-btn" onclick="limparDados()" class="w-full py-2 bg-secondary-color hover:bg-red-700 text-white font-bold rounded-lg transition duration-300 shadow-md">
+            LIMPAR TODOS OS DADOS (ZERAR)
+        </button>
+
+        <!-- Nomes dos Times -->
+        <div class="flex space-x-4">
+            <div class="flex-1">
+                <label for="time_a" class="input-label">Time A (Atacante)</label>
+                <input type="text" id="time_a" value="" class="w-full">
+            </div>
+            <div class="flex-1">
+                <label for="time_b" class="input-label">Time B (Defensor)</label>
+                <input type="text" id="time_b" value="" class="w-full">
+            </div>
+        </div>
+
+        <!-- NÚMERO DE PARTIDAS (CAMPO ÚNICO) -->
+        <div class="space-y-2">
+            <h3 class="header-title p-2 rounded text-center text-sm font-bold">NÚMERO DE PARTIDAS (TOTAL)</h3>
+            <div class="text-center">
+                <label for="n_partidas_total" class="input-label">Nº de Partidas Analisadas</label>
+                <input type="number" id="n_partidas_total" value="" class="w-full text-center" min="0" oninput="sincronizarJogosAnalisados(this.value)">
+                <p class="text-xs text-gray-500 mt-1">Este valor será usado como Nº de Partidas do A, B e Nº de Jogos Analisados.</p>
+            </div>
+        </div>
+
+        <!-- MÉDIAS GERAIS POR JOGO (FT) -->
+        <div class="space-y-2">
+            <h3 class="header-title p-2 rounded text-center text-sm font-bold">MÉDIAS GERAIS POR JOGO (FT)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Coluna Esquerda: Time A -->
+                <div class="space-y-2">
+                    <div>
+                        <label for="a_marcados_media" class="input-label">A Marcados (Média)</label>
+                        <input type="number" step="0.1" id="a_marcados_media" value="" class="w-full text-center">
+                    </div>
+                    <div>
+                        <label for="a_sofridos_media" class="input-label">A Sofridos (Média)</label>
+                        <input type="number" step="0.1" id="a_sofridos_media" value="" class="w-full text-center">
+                    </div>
+                </div>
+                <!-- Coluna Direita: Time B -->
+                <div class="space-y-2">
+                    <div>
+                        <label for="b_marcados_media" class="input-label">B Marcados (Média)</label>
+                        <input type="number" step="0.1" id="b_marcados_media" value="" class="w-full text-center">
+                    </div>
+                    <div>
+                        <label for="b_sofridos_media" class="input-label">B Sofridos (Média)</label>
+                        <input type="number" step="0.1" id="b_sofridos_media" value="" class="w-full text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOLS TOTAIS POR FAIXA DE MINUTOS (00'-90') - COM GRELHA VISÍVEL -->
+        <div class="space-y-2">
+            <h3 class="header-title p-2 rounded text-center text-sm font-bold">GOLS TOTAIS POR FAIXA DE MINUTOS (00'-90')</h3>
+            <div class="text-center">
+                <label class="input-label">Nº de Jogos Analisados (Total)</label>
+                <input type="number" id="n_jogos_analisados_display" value="" class="w-1/2 text-center bg-gray-700 pointer-events-none" readonly>
+            </div>
+            
+            <!-- Tabela de Faixa de Minutos - Com Grelha -->
+            <div class="minutos-table-container overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr>
+                            <th class="table-cell-header w-1/6"></th>
+                            <th class="table-cell-header">00'-15'</th>
+                            <th class="table-cell-header">15'-30'</th>
+                            <th class="table-cell-header">30'-45'</th>
+                            <th class="table-cell-header">45'-60'</th>
+                            <th class="table-cell-header">60'-75'</th>
+                            <th class="table-cell-header">75'-90'</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="table-cell-header">A Marc.</td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_00" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_15" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_30" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_45" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_60" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_marc_75" value=""></td>
+                        </tr>
+                        <tr>
+                            <td class="table-cell-header">A Sofr.</td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_00" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_15" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_30" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_45" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_60" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="a_sofr_75" value=""></td>
+                        </tr>
+                        <tr>
+                            <td class="table-cell-header">B Marc.</td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_00" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_15" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_30" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_45" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_60" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_marc_75" value=""></td>
+                        </tr>
+                        <tr>
+                            <td class="table-cell-header">B Sofr.</td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_00" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_15" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_30" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_45" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_60" value=""></td>
+                            <td class="table-cell-input"><input type="number" id="b_sofr_75" value=""></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ESCANTEIOS / CARTÕES / FALTAS (Média Geral) -->
+        <div class="space-y-2">
+            <h3 class="header-title p-2 rounded text-center text-sm font-bold">ESCANTEIOS / CARTÕES / FALTAS (Média Geral)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <!-- Escanteios -->
+                    <div>
+                        <label for="a_escant_media" class="input-label">A Escant.</label>
+                        <input type="number" step="0.1" id="a_escant_media" value="" class="w-full text-center">
+                    </div>
+                    <!-- Cartões -->
+                    <div>
+                        <label for="a_cartoes_media" class="input-label">A Cartões</label>
+                        <input type="number" step="0.1" id="a_cartoes_media" value="" class="w-full text-center">
+                    </div>
+                    <!-- Faltas -->
+                    <div>
+                        <label for="a_faltas_media" class="input-label">A Faltas</label>
+                        <input type="number" step="0.1" id="a_faltas_media" value="" class="w-full text-center">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <!-- Escanteios -->
+                    <div>
+                        <label for="b_escant_media" class="input-label">B Escant.</label>
+                        <input type="number" step="0.1" id="b_escant_media" value="" class="w-full text-center">
+                    </div>
+                    <!-- Cartões -->
+                    <div>
+                        <label for="b_cartoes_media" class="input-label">B Cartões</label>
+                        <input type="number" step="0.1" id="b_cartoes_media" value="" class="w-full text-center">
+                    </div>
+                    <!-- Faltas -->
+                    <div>
+                        <label for="b_faltas_media" class="input-label">B Faltas</label>
+                        <input type="number" step="0.1" id="b_faltas_media" value="" class="w-full text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botão de Validação por IA -->
+        <button onclick="validarDadosComIA()" id="ia-btn" class="w-full py-3 bg-ai-color hover:bg-blue-600 text-white font-extrabold rounded-lg text-lg transition duration-300 shadow-xl">
+            VALIDAR E GERAR PROGNÓSTICO IA
+        </button>
+
+        <!-- Botão de Cálculo -->
+        <button onclick="calcularProjeções()" class="w-full py-3 bg-primary-color hover:bg-emerald-700 text-white font-extrabold rounded-lg text-lg transition duration-300 shadow-xl mt-2">
+            CALCULAR PROJEÇÕES
+        </button>
+
+        <div id="mensagem_saida" class="mt-4 p-3 bg-red-900 rounded-lg hidden"></div>
+
+    </div>
+    <!-- FIM 1. ENTRADA DE DADOS -->
+    
+    <!-- 3. VALIDAÇÃO IA (NOVA SEÇÃO) -->
+    <div class="card p-4 rounded-lg space-y-4">
+        <h2 class="text-xl font-semibold border-b border-gray-600 pb-2 text-ai-color">3. PROGNÓSTICO DE APOSTAS POR IA</h2>
+        <div id="validacao_ia_output" class="text-gray-400 italic">
+            Insira os dados e clique em "VALIDAR E GERAR PROGNÓSTICO IA" para obter análise e recomendações.
+        </div>
+    </div>
+
+    <!-- 2. PROJEÇÕES E PROBABILIDADES -->
+    <div class="card p-4 rounded-lg space-y-4">
+        <h2 class="text-xl font-semibold border-b border-gray-600 pb-2 text-yellow-500">2. PROJEÇÕES (SAÍDA)</h2>
+        <div class="text-gray-400 italic" id="resultado_projecao">
+            Pressione "CALCULAR PROJEÇÕES" para ver os resultados aqui.
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    // --- Configurações de IA e Firebase ---
+    const API_KEY = ""; // A chave API será fornecida em tempo de execução
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+    
+    // Variáveis globais (stub para seguir as diretrizes)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    // --- LÓGICA DE VALIDAÇÃO POR IA ---
+
+    /**
+     * Valida os dados inseridos pelo usuário com estatísticas reais da internet e gera prognósticos.
+     * @returns {void}
+     */
+    async function validarDadosComIA() {
+        const timeA = getInputValue('time_a', false);
+        const timeB = getInputValue('time_b', false);
+        const aMarcados = getInputValue('a_marcados_media');
+        const bMarcados = getInputValue('b_marcados_media');
+        const aEscantMedia = getInputValue('a_escant_media'); // Novo dado
+        const bEscantMedia = getInputValue('b_escant_media'); // Novo dado
+        const aCartoesMedia = getInputValue('a_cartoes_media'); // Novo dado
+        const bCartoesMedia = getInputValue('b_cartoes_media'); // Novo dado
+        const nPartidas = getInputValue('n_partidas_total');
+
+        const outputElement = document.getElementById('validacao_ia_output');
+        const iaButton = document.getElementById('ia-btn');
+
+        if (!timeA || !timeB) {
+            outputElement.innerHTML = `<p class="text-red-400 font-bold">ERRO: Por favor, insira o nome do Time A e do Time B para a validação.</p>`;
+            return;
+        }
+
+        outputElement.innerHTML = `
+            <div class="flex items-center justify-center space-x-2 text-ai-color">
+                <svg class="animate-spin h-5 w-5 text-ai-color" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="font-bold">Analisando dados e gerando prognóstico de alto valor...</span>
+            </div>
+        `;
+        iaButton.disabled = true;
+
+        const systemPrompt = `Você é um Prognosticador e Analista de Apostas Esportivas de elite. Sua tarefa é, primeiramente, validar a coerência dos dados manuais do usuário (Locais) com as estatísticas reais encontradas na internet (Externas). Em seguida, você deve fornecer prognósticos de apostas de alta confiança.
+
+REGRAS:
+1. Analise as estatísticas de Gols (Marcados/Sofridos), Escanteios e Cartões do usuário e da web.
+2. Forneça uma Avaliação de Coerência Simples: Coerente / Incoerente.
+3. Forneça um Prognóstico de Aposta apenas para mercados onde a chance de ocorrência seja calculada em **70% ou mais**.
+4. Se a chance for menor que 70% para um mercado específico, responda "Nenhuma Aposta de Alto Valor".
+5. A saída DEVE ser estruturada com tags HTML para ser exibida em um card moderno.
+
+DADOS DO USUÁRIO (LOCAIS):
+Time A: ${timeA}, Time B: ${timeB}
+Média Gols A Marcados: ${aMarcados.toFixed(2)}, Média Gols B Marcados: ${bMarcados.toFixed(2)}
+Média Escanteios A: ${aEscantMedia.toFixed(2)}, Média Escanteios B: ${bEscantMedia.toFixed(2)}
+Média Cartões A: ${aCartoesMedia.toFixed(2)}, Média Cartões B: ${bCartoesMedia.toFixed(2)}
+Nº Partidas Analisadas: ${nPartidas}.
+`;
+
+        const userQuery = `Busque as estatísticas mais recentes de gols (média de gols marcados e sofridos), escanteios (média total) e cartões (média total) para os times ${timeA} e ${timeB} (se possível, dos últimos ${nPartidas} jogos). Com base na comparação entre os Dados Locais e os Dados Externos, gere a análise e o Prognóstico de Aposta (apenas mercados com 70%+):
+        - Ambas Marcam (Sim/Não)
+        - Over/Under Gols (Qual linha?)
+        - Over/Under Escanteios (Qual linha?)
+        - Over/Under Cartões (Qual linha?)`;
+
+        const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            tools: [{ "google_search": {} }],
+            systemInstruction: {
+                parts: [{ text: systemPrompt }]
+            },
+        };
+
+        try {
+            const response = await fetchWithRetry(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                const aiText = candidate.content.parts[0].text;
+                
+                // Exibir resultado da IA dentro do novo estilo de card
+                outputElement.innerHTML = `
+                    <div class="prognostico-card">
+                        <div class="prognostico-header">
+                            RELATÓRIO DE PROGNÓSTICO AVANÇADO
+                        </div>
+                        <div class="text-sm space-y-4">
+                            ${aiText}
+                        </div>
+                    </div>
+                `;
+
+            } else {
+                outputElement.innerHTML = `<p class="text-yellow-400 font-bold">⚠️ Não foi possível obter uma resposta da IA. Tente novamente, verifique os nomes dos times ou a conexão.</p>`;
+            }
+
+        } catch (error) {
+            console.error("Erro na chamada da API Gemini:", error);
+            outputElement.innerHTML = `<p class="text-red-400 font-bold">❌ Erro de conexão ou API. Verifique o console.</p>`;
+        } finally {
+            iaButton.disabled = false;
+        }
+    }
+
+    // Função de tratamento de erros e retentativas (Exponential Backoff)
+    async function fetchWithRetry(url, options, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 429 && i < retries - 1) { // 429 Too Many Requests
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                if (i === retries - 1) {
+                    throw error;
+                }
+                // Continua para a próxima retentativa
+            }
+        }
+    }
+
+
+    // --- FUNÇÕES DE DASHBOARD EXISTENTES ---
+
+    // Definição dos valores padrão para RESET (agora zerados ou vazios)
+    const DEFAULT_VALUES_V26 = {
+        time_a: '',
+        time_b: '',
+        n_partidas_total: 0,
+        a_marcados_media: 0,
+        a_sofridos_media: 0,
+        b_marcados_media: 0,
+        b_sofridos_media: 0,
+        a_marc_00: 0, a_marc_15: 0, a_marc_30: 0, a_marc_45: 0, a_marc_60: 0, a_marc_75: 0,
+        a_sofr_00: 0, a_sofr_15: 0, a_sofr_30: 0, a_sofr_45: 0, a_sofr_60: 0, a_sofr_75: 0,
+        b_marc_00: 0, b_marc_15: 0, b_marc_30: 0, b_marc_45: 0, b_marc_60: 0, b_marc_75: 0,
+        b_sofr_00: 0, b_sofr_15: 0, b_sofr_30: 0, b_sofr_45: 0, b_sofr_60: 0, b_sofr_75: 0,
+        a_escant_media: 0,
+        b_escant_media: 0,
+        a_cartoes_media: 0,
+        b_cartoes_media: 0,
+        a_faltas_media: 0,
+        b_faltas_media: 0
+    };
+
+    function getInputValue(id, isNumber = true) {
+        const input = document.getElementById(id);
+        if (input) {
+            if (isNumber) {
+                const value = parseFloat(input.value.replace(',', '.'));
+                return isNaN(value) ? 0 : value;
+            }
+            return input.value.trim();
+        }
+        return isNumber ? 0 : '';
+    }
+
+    function sincronizarJogosAnalisados(value) {
+        const displayInput = document.getElementById('n_jogos_analisados_display');
+        if (displayInput) {
+            displayInput.value = value;
+        }
+    }
+
+    function calcularProjeções() {
+        // Puxa os dados de entrada
+        const timeA = getInputValue('time_a', false) || 'Time A';
+        const timeB = getInputValue('time_b', false) || 'Time B';
+        const nPartidas = getInputValue('n_partidas_total');
+        const aMarcadosMedia = getInputValue('a_marcados_media');
+        const aSofridosMedia = getInputValue('a_sofridos_media');
+        const bMarcadosMedia = getInputValue('b_marcados_media');
+        const bSofridosMedia = getInputValue('b_sofridos_media');
+        const aEscantMedia = getInputValue('a_escant_media');
+        const bEscantMedia = getInputValue('b_escant_media');
+        const aCartoesMedia = getInputValue('a_cartoes_media'); // Puxa média de cartões
+        const bCartoesMedia = getInputValue('b_cartoes_media'); // Puxa média de cartões
+
+        const output = document.getElementById('resultado_projecao');
+        const msgSaida = document.getElementById('mensagem_saida');
+        
+        // Validação Mínima
+        if (nPartidas === 0 || (aMarcadosMedia === 0 && bMarcadosMedia === 0)) {
+            msgSaida.innerHTML = '<strong>ERRO:</strong> Por favor, insira o Número de Partidas (Total) e pelo menos uma Média de Gols (Marcados) para iniciar o cálculo.';
+            msgSaida.classList.remove('hidden');
+            output.innerHTML = 'Pressione "CALCULAR PROJEÇÕES" para ver os resultados aqui.';
+            return;
+        }
+        msgSaida.classList.add('hidden');
+
+        // --- LÓGICA SIMULADA DE PROJEÇÃO ---
+        
+        // 1. Projeção de Gols (Média Esperada)
+        const lambdaA = (aMarcadosMedia + bSofridosMedia) / 2; 
+        const lambdaB = (bMarcadosMedia + aSofridosMedia) / 2; 
+        const golsEsperadosTotal = (lambdaA + lambdaB).toFixed(2);
+        
+        // 2. Probabilidades de Gols (SIMULADAS)
+        const probBTTS_Sim = Math.min(99, Math.max(30, (aMarcadosMedia * bMarcadosMedia) * 35)).toFixed(1); 
+        const probOver0_5_FT = Math.min(98, Math.max(70, 75 + (golsEsperadosTotal - 2.5) * 10)).toFixed(1);
+        const probOver1_5_FT = Math.min(90, Math.max(50, 60 + (golsEsperadosTotal - 2.5) * 15)).toFixed(1);
+        const probOver2_5_FT = Math.min(65, Math.max(20, 35 + (golsEsperadosTotal - 2.5) * 20)).toFixed(1);
+        const probOver3_5_FT = Math.min(40, Math.max(10, 15 + (golsEsperadosTotal - 2.5) * 15)).toFixed(1);
+
+        // 3. Projeção de Escanteios (Média Esperada)
+        const escanteiosEsperados = (aEscantMedia + bEscantMedia).toFixed(2);
+        
+        // 4. Probabilidades de Escanteios (SIMULADAS)
+        const probOver9_5 = Math.min(85, Math.max(40, 60 + (escanteiosEsperados - 9.5) * 5)).toFixed(1);
+        const probOver10_5 = Math.min(70, Math.max(30, 50 + (escanteiosEsperados - 10.5) * 5)).toFixed(1);
+        const probOver11_5 = Math.min(55, Math.max(20, 40 + (escanteiosEsperados - 11.5) * 5)).toFixed(1);
+        
+        // 5. Projeção de Cartões (Média Esperada)
+        const cartoesEsperados = (aCartoesMedia + bCartoesMedia).toFixed(2);
+        
+        // Monta o HTML de Saída
+        output.innerHTML = `
+            <!-- GOLS (PROJEÇÕES GERAIS FT) -->
+            <div class="output-section bg-blue-950/50">
+                <div class="output-header text-blue-400">GOLS (Projeções Gerais FT)</div>
+                <div class="flex items-baseline justify-between mb-4">
+                    <span class="text-3xl font-extrabold text-blue-300">${golsEsperadosTotal}</span>
+                    <span class="text-sm font-semibold text-gray-400">Gols Esperados Totais</span>
+                </div>
+
+                <p class="text-xs text-gray-500 mb-2">Time A: ${timeA} | Time B: ${timeB} | Partidas: ${nPartidas}</p>
+                
+                <div class="output-header text-blue-400">PROBABILIDADE POISSON (SIMULADA)</div>
+                
+                <div class="space-y-2">
+                    <div class="prob-card bg-green-900/30">
+                        <span>BTTS (Ambas Marcam) SIM:</span>
+                        <span class="prob-value text-success-color">${probBTTS_Sim}%</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="prob-card">
+                            <span>Over 0.5 FT:</span>
+                            <span class="prob-value text-success-color">${probOver0_5_FT}%</span>
+                        </div>
+                        <div class="prob-card">
+                            <span>Over 1.5 FT:</span>
+                            <span class="prob-value text-success-color">${probOver1_5_FT}%</span>
+                        </div>
+                        <div class="prob-card">
+                            <span>Over 2.5 FT:</span>
+                            <span class="prob-value text-success-color">${probOver2_5_FT}%</span>
+                        </div>
+                        <div class="prob-card">
+                            <span>Over 3.5 FT:</span>
+                            <span class="prob-value text-success-color">${probOver3_5_FT}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ESCANTEIOS (PROJEÇÕES) -->
+            <div class="output-section bg-yellow-950/50">
+                <div class="output-header text-yellow-400">ESCANTEIOS (Projeções)</div>
+                <div class="flex items-baseline justify-between mb-4">
+                    <span class="text-3xl font-extrabold text-yellow-300">${escanteiosEsperados}</span>
+                    <span class="text-sm font-semibold text-gray-400">Escanteios Esperados Totais</span>
+                </div>
+                
+                <div class="output-header text-yellow-400">PROBABILIDADE OVER ESCANTEIOS (SIMULADA)</div>
+                <div class="space-y-2">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="prob-card bg-gray-700/50">
+                            <span>Over 9.5:</span>
+                            <span class="prob-value text-warning-color">${probOver9_5}%</span>
+                        </div>
+                        <div class="prob-card bg-gray-700/50">
+                            <span>Over 10.5:</span>
+                            <span class="prob-value text-warning-color">${probOver10_5}%</span>
+                        </div>
+                        <div class="prob-card bg-gray-700/50">
+                            <span>Over 11.5:</span>
+                            <span class="prob-value text-warning-color">${probOver11_5}%</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Linha Sugerida (Base Escanteios): <strong>Over ${Math.floor(escanteiosEsperados) - 1}.5</strong></p>
+                </div>
+            </div>
+
+            <!-- CARTÕES (PROJEÇÕES) -->
+            <div class="output-section bg-red-950/50">
+                <div class="output-header text-red-400">CARTÕES (Projeções)</div>
+                <div class="flex items-baseline justify-between">
+                    <span class="text-3xl font-extrabold text-red-300">${cartoesEsperados}</span>
+                    <span class="text-sm font-semibold text-gray-400">Cartões Esperados Totais</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Média ${timeA}: ${aCartoesMedia.toFixed(1)} | Média ${timeB}: ${bCartoesMedia.toFixed(1)}</p>
+                <p class="text-xs text-gray-500 mt-1">Linha Sugerida: <strong>Over ${Math.floor(cartoesEsperados) - 1}.5</strong></p>
+            </div>
+        `;
+    }
+    
+    function limparDados() {
+        for (const id in DEFAULT_VALUES_V26) {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = DEFAULT_VALUES_V26[id].toString();
+            }
+        }
+        document.getElementById('n_jogos_analisados_display').value = '0';
+        document.getElementById('resultado_projecao').innerHTML = 'Pressione "CALCULAR PROJEÇÕES" para ver os resultados aqui.';
+        document.getElementById('validacao_ia_output').innerHTML = 'Insira os dados e clique em "VALIDAR E GERAR PROGNÓSTICO IA" para obter análise e recomendações.';
+        document.getElementById('mensagem_saida').classList.add('hidden');
+    }
+
+    window.sincronizarJogosAnalisados = function(value) {
+        document.getElementById('n_jogos_analisados_display').value = value;
+    }
+
+    // Inicialização da UI e Firebase (stub)
+    window.onload = function() {
+        if (firebaseConfig) console.log("Firebase Config disponível. Configurando stub.");
+        const initialPartidas = getInputValue('n_partidas_total', false);
+        document.getElementById('n_jogos_analisados_display').value = initialPartidas || '0';
+    };
+</script>
+
+</body>
+</html>
